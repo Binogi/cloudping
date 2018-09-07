@@ -15,6 +15,7 @@ def ping(event, context):
         'method': 'GET',
         'allow_redirects': False,
         'timeout': 5,
+        'verify_response_contains': '',
     }
     options.update(event)
     url = '{protocol}://{domain}{path}'.format(**options)
@@ -26,7 +27,11 @@ def ping(event, context):
             allow_redirects=options['allow_redirects'],
             timeout=options['timeout'])
         response.raise_for_status()
-        result_value = 0
+        if options['verify_response_contains'] in response.text:
+            result_value = 0
+        else:
+            print("Could not find required string in response", response.text)
+            result_value = 1
     except Exception as e:
         print(str(e))
         result_value = 1

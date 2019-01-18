@@ -19,6 +19,7 @@ def ping(event, context):
     }
     options.update(event)
     url = '{protocol}://{domain}{path}'.format(**options)
+    response_time = 0
 
     try:
         response = requests.request(
@@ -27,6 +28,7 @@ def ping(event, context):
             allow_redirects=options['allow_redirects'],
             timeout=options['timeout'])
         response.raise_for_status()
+        response_time = response.elapsed.total_seconds()
         if options['verify_response_contains'] in response.text:
             result_value = 0
         else:
@@ -38,17 +40,13 @@ def ping(event, context):
 
     print(json.dumps({
         'cloudping_result': result_value,
+        'response_time': response_time,
         'url': url,
         'options': options
     }))
 
     client = boto3.client('cloudwatch')
-    response = client.put_metric_data(
-        Namespace='cloudping',
-        MetricData=[
-            {
-                'MetricName': 'status',
-                'Dimensions': [
+    dimensions = [
                     {
                         'Name': 'url',
                         'Value': url
@@ -61,10 +59,30 @@ def ping(event, context):
                         'Name': 'protocol',
                         'Value': options['protocol']
                     },
-                ],
-                'Timestamp': datetime.datetime.utcnow(),
+                ]
+    timestamp = datetime.datetime.utcnow()
+    client.put_metric_data(
+        Namespace='cloudping',
+        MetricData=[
+            {
+                'MetricName': 'status',
+                'Dimensions': dimensions,
+                'Timestamp': timestamp,
                 'Value': result_value,
                 'Unit': 'None',
+                'StorageResolution': 60
+            },
+        ]
+    )
+    client.put_metric_data(
+        Namespace='cloudping',
+        MetricData=[
+            {
+                'MetricName': 'responseTime',
+                'Dimensions': dimensions,
+                'Timestamp': timestamp,
+                'Value': response_time,
+                'Unit': 'Seconds',
                 'StorageResolution': 60
             },
         ]

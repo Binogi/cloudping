@@ -19,7 +19,7 @@ def ping(event, context):
     }
     options.update(event)
     url = '{protocol}://{domain}{path}'.format(**options)
-    response_time = 0
+    response_time = None
 
     try:
         response = requests.request(
@@ -74,16 +74,17 @@ def ping(event, context):
             },
         ]
     )
-    client.put_metric_data(
-        Namespace='cloudping',
-        MetricData=[
-            {
-                'MetricName': 'responseTime',
-                'Dimensions': dimensions,
-                'Timestamp': timestamp,
-                'Value': response_time,
-                'Unit': 'Seconds',
-                'StorageResolution': 60
-            },
-        ]
-    )
+    if response_time:
+        client.put_metric_data(
+            Namespace='cloudping',
+            MetricData=[
+                {
+                    'MetricName': 'responseTime',
+                    'Dimensions': dimensions,
+                    'Timestamp': timestamp,
+                    'Value': response_time,
+                    'Unit': 'Seconds',
+                    'StorageResolution': 60
+                },
+            ]
+        )

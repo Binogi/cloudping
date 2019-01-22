@@ -47,19 +47,19 @@ def ping(event, context):
 
     client = boto3.client('cloudwatch')
     dimensions = [
-                    {
-                        'Name': 'url',
-                        'Value': url
-                    },
-                    {
-                        'Name': 'method',
-                        'Value': options['method']
-                    },
-                    {
-                        'Name': 'protocol',
-                        'Value': options['protocol']
-                    },
-                ]
+        {
+            'Name': 'url',
+            'Value': url
+        },
+        {
+            'Name': 'method',
+            'Value': options['method']
+        },
+        {
+            'Name': 'protocol',
+            'Value': options['protocol']
+        },
+    ]
     timestamp = datetime.datetime.utcnow()
     client.put_metric_data(
         Namespace='cloudping',

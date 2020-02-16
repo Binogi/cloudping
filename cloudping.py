@@ -13,7 +13,7 @@ def ping(event, context):
         'protocol': 'http',
         'path': '/',
         'method': 'GET',
-        'allow_redirects': False,
+        'allow_redirects': "False",
         'timeout': 5,
         'verify_response_contains': '',
     }
@@ -25,7 +25,7 @@ def ping(event, context):
         response = requests.request(
             options['method'],
             url,
-            allow_redirects=options['allow_redirects'],
+            allow_redirects=(options['allow_redirects'] == "True"),
             timeout=options['timeout'])
         response.raise_for_status()
         response_time = response.elapsed.total_seconds()

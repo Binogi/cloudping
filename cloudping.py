@@ -61,30 +61,32 @@ def ping(event, context):
         },
     ]
     timestamp = datetime.datetime.utcnow()
+    #client.put_metric_data(
+    #    Namespace='cloudping',
+    #    MetricData=[
+    #        {
+    #            'MetricName': 'status',
+    #            'Dimensions': dimensions,
+    #            'Timestamp': timestamp,
+    #            'Value': result_value,
+    #            'Unit': 'None',
+    #            'StorageResolution': 60
+    #        },
+    #    ]
+    #)
+    # For cost saving reasons, only send ONE metric. If http status code or contents are not good, don't care about response time!
+    if result_value != 0:
+        response_time = 999
     client.put_metric_data(
         Namespace='cloudping',
         MetricData=[
             {
-                'MetricName': 'status',
+                'MetricName': 'responseTime',
                 'Dimensions': dimensions,
                 'Timestamp': timestamp,
-                'Value': result_value,
-                'Unit': 'None',
+                'Value': response_time,
+                'Unit': 'Seconds',
                 'StorageResolution': 60
             },
         ]
     )
-    if response_time:
-        client.put_metric_data(
-            Namespace='cloudping',
-            MetricData=[
-                {
-                    'MetricName': 'responseTime',
-                    'Dimensions': dimensions,
-                    'Timestamp': timestamp,
-                    'Value': response_time,
-                    'Unit': 'Seconds',
-                    'StorageResolution': 60
-                },
-            ]
-        )
